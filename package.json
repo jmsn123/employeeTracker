@@ -9,8 +9,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "console": "^0.7.2",
+    "console.table": "^0.10.0",
     "inquirer": "^8.0.0",
     "mysql": "^2.18.1",
-    "nodemon": "^2.0.7"
+    "nodemon": "^2.0.7",
+    "table": "^6.0.7"
   }
 }
