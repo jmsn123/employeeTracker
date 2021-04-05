@@ -18,8 +18,9 @@ const connection = mysql.createConnection({
 connection.connect((err) => {
     if (err) throw err;
     console.log(`connected as id ${connection.threadId}`);
-    // roles();
-    main();
+    console.log("print here", setRoles())
+    setRoles()
+        // main();
 });
 
 
@@ -78,17 +79,23 @@ function viewAllEmp() {
     });
 }
 
-function roles() {
+function setRoles() {
     let roleSet = [];
-    let sql = " SELECT * FROM role";
-    connection.query(sql, (err, res) => {
+
+    let sql = "SELECT * FROM role";
+    connection.query(sql, function(err, res) {
         if (err) throw err;
         for (let i = 0; i < res.length; i++) {
-            roleSet.push(res[i].title);
+            roleSet.push(res[i]);
+
         }
+
+
+        return roleSet
     });
-    return roleSet;
+
 }
+
 
 function department() {
     let deptSet = [];
@@ -140,27 +147,35 @@ function addDept() {
 }
 
 function updateRole() {
-    const sql = `SELECT employee.first_name,employee.last_name,role.title FROM employee INNER JOIN role on role.id = employee.role_id; SELECT title FROM roles`
+    const sql = `SELECT employee.first_name,employee.last_name,role.title FROM employee INNER JOIN role on role.id = employee.role_id; `
+        // const roles = await connection.query(`SELECT title FROM roles`)
+        // console.log(roles)
     connection.query(sql, (err, res) => {
         if (err) throw err;
         inquirer.prompt([{
             name: 'employee',
             type: 'list',
             choices: function() {
-                let usersArray = res[0].map(user => user.first_name)
-                console.log(res);
+                let usersArray = res.map(user => user.last_name)
+                console.log("res", res);
                 return usersArray
             },
             message: "Who would you like to update "
         }, {
             name: "updatedRole",
             type: 'list',
-            choices: function() {
-                let usersArray = res[1].map(role => role.title)
-                return usersArray;
-            }
+            choices: setRoles()
         }]).then(response => {
-            console.log(response)
+            let id = roles().indexOf(response.updateRole) + 1;
+            console.log(roles())
+            let sql = "UPDATE employee SET role_id = ? WHERE last_name = ?";
+            connection.query(sql, [1, response.employee], (err, res) => {
+                if (err) throw err;
+                console.table(response);
+
+            })
+        }).catch(err => {
+            console.log(err)
         })
     })
 }
@@ -176,7 +191,7 @@ function addRole() {
         message: "Please put in your salary "
     }]).then((response) => {
         let sql = "INSERT INTO role SET ?"
-        connection.query(sql, { name: response.name, salary: response.salary }, (err, res) => {
+        connection.query(sql, { title: response.name, salary: response.salary }, (err, res) => {
             if (err) throw err
             console.table("res", res);
             main();
@@ -209,6 +224,7 @@ function addEmp() {
             choices: department(),
         },
     ]).then((response) => {
-        console.log(response)
+        let sql = "INSERT INTO employee SET ? "
+        connection.query(sql, { first_name: response.firstName, last_name: response.lastName, role_id: response.role8 })
     })
 }
