@@ -146,6 +146,14 @@ function addDept() {
     })
 }
 
+function user(res) {
+
+    let usersArray = res.map(user => user.last_name)
+    console.log("rehhhhhs", res);
+    return usersArray
+
+}
+
 function updateRole() {
     const sql = `SELECT employee.first_name,employee.last_name,role.title FROM employee INNER JOIN role on role.id = employee.role_id; `
         // const roles = await connection.query(`SELECT title FROM roles`)
@@ -154,20 +162,17 @@ function updateRole() {
         if (err) throw err;
         inquirer.prompt([{
             name: 'employee',
-            type: 'list',
-            choices: function() {
-                let usersArray = res.map(user => user.last_name)
-                console.log("res", res);
-                return usersArray
-            },
-            message: "Who would you like to update "
+            type: 'rawlist',
+            choices: user(res),
+            message: "Who would you like to update ",
         }, {
             name: "updatedRole",
-            type: 'list',
-            choices: setRoles()
+            type: 'rawlist',
+            choices: setRoles(),
+            message: "Who would you like to update ",
+
         }]).then(response => {
-            let id = roles().indexOf(response.updateRole) + 1;
-            console.log(roles())
+            let id = setRoles().indexOf(response.updateRole) + 1;
             let sql = "UPDATE employee SET role_id = ? WHERE last_name = ?";
             connection.query(sql, [1, response.employee], (err, res) => {
                 if (err) throw err;
@@ -175,6 +180,7 @@ function updateRole() {
 
             })
         }).catch(err => {
+            console.log("object")
             console.log(err)
         })
     })
@@ -215,7 +221,7 @@ function addEmp() {
             name: "role",
             type: "list",
             message: "What is the role?",
-            choices: roles(),
+            choices: setRoles(),
         },
         {
             name: "dept",
