@@ -326,13 +326,12 @@ function addRole() {
             {
                 name: "dept",
                 type: "list",
-                choices: deptList(),
+                choices: selectDept(),
                 message: "Please pick your dept ",
             },
         ])
         .then((response) => {
             let sql = "INSERT INTO role SET ?";
-            const id = deptList();
             connection.query(
                 sql, {
                     title: response.name,
@@ -341,7 +340,7 @@ function addRole() {
                 },
                 (err, res) => {
                     if (err) throw err;
-                    console.table("res", res);
+
                     main();
                 }
             );
