@@ -74,6 +74,17 @@ function selectRole() {
     });
     return roleArr;
 }
+let deptArr = [];
+
+function selectDept() {
+    connection.query("SELECT * FROM department", function(err, res) {
+        if (err) throw err;
+        for (var i = 0; i < res.length; i++) {
+            deptArr.push(res[i].name);
+        }
+    });
+    return deptArr;
+}
 
 function updateEmployee() {
     let sql =
@@ -288,86 +299,98 @@ function updateRole(user, setRoles) {
                 console.log(err);
             });
     });
+}
+let choiceArray;
 
-    function addRole() {
-        connect;
-        inquirer
-            .prompt([{
-                    name: "name",
-                    type: "input",
-                    message: "Please add your Role",
-                },
-                {
-                    name: "salary",
-                    type: "input",
-                    message: "Please put in your salary ",
-                },
-                {
-                    name: "dept",
-                    type: "list",
-                    choices: function() {
-                        let choiceArray = results[1].map(
-                            (choice) => choice.department_name
-                        );
-                        return choiceArray;
-                    },
-                    message: "Please put in your salary ",
-                },
-            ])
-            .then((response) => {
-                let sql = "INSERT INTO role SET ?";
-                connection.query(
-                    sql, { title: response.name, salary: response.salary },
-                    (err, res) => {
-                        if (err) throw err;
-                        console.table("res", res);
-                        main();
-                    }
-                );
-            });
-    }
+function deptlist() {
+    connection.query(`SELECT*FROM department`, (err, res) => {
+        if (err) throw err;
+        console.log(res.name);
+        choiceArray = res.map((choice) => choice.name);
+    });
+    return choiceArray;
+}
 
-    function addEmp() {
-        inquirer
-            .prompt([{
-                    name: "firstName",
-                    type: "input",
-                    message: "please input First Name",
+function addRole() {
+    inquirer
+        .prompt([{
+                name: "name",
+                type: "input",
+                message: "Please add your Role",
+            },
+            {
+                name: "salary",
+                type: "input",
+                message: "Please put in your salary ",
+            },
+            {
+                name: "dept",
+                type: "list",
+                choices: deptList(),
+                message: "Please pick your dept ",
+            },
+        ])
+        .then((response) => {
+            let sql = "INSERT INTO role SET ?";
+            const id = deptList();
+            connection.query(
+                sql, {
+                    title: response.name,
+                    salary: response.salary,
+                    department_id: 1,
                 },
-                {
-                    name: "lastName",
-                    type: "input",
-                    message: "please input Last Name",
+                (err, res) => {
+                    if (err) throw err;
+                    console.table("res", res);
+                    main();
+                }
+            );
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+}
+
+function addEmp() {
+    inquirer
+        .prompt([{
+                name: "firstName",
+                type: "input",
+                message: "please input First Name",
+            },
+            {
+                name: "lastName",
+                type: "input",
+                message: "please input Last Name",
+            },
+            {
+                name: "role",
+                type: "list",
+                message: "What is the role?",
+                choices: selectRole(),
+            },
+            {
+                name: "dept",
+                type: "list",
+                message: "What is the department that you are assigned to?",
+                choices: selectDept(),
+            },
+        ])
+        .then((response) => {
+            let sql = "INSERT INTO employee SET ? ";
+            connection.query(
+                sql, {
+                    first_name: response.firstName,
+                    last_name: response.lastName,
+                    role_id: response.role8,
                 },
-                {
-                    name: "role",
-                    type: "list",
-                    message: "What is the role?",
-                    choices: selectRole(),
-                },
-                {
-                    name: "dept",
-                    type: "list",
-                    message: "What is the department that you are assigned to?",
-                    choices: department(),
-                },
-            ])
-            .then((response) => {
-                let sql = "INSERT INTO employee SET ? ";
-                connection.query(
-                    sql, {
-                        first_name: response.firstName,
-                        last_name: response.lastName,
-                        role_id: response.role8,
-                    },
-                    (err, res) => {
-                        if (err) throw err;
-                        console.log("ew", res);
-                    }
-                );
-            })
-            .catch((err) => {
-                console.log(err);
-            });
-    }
+                (err, res) => {
+                    if (err) throw err;
+                    console.log("we added the new employee");
+                }
+            );
+        })
+        .catch((err) => {
+            console.log(err);
+        });
 }
