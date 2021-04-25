@@ -378,15 +378,20 @@ function addEmp() {
         ])
         .then((response) => {
             let sql = "INSERT INTO employee SET ? ";
+            let idrole = selectRole().indexOf(response.role) + 1;
+            let idmanager = selectDept().indexOf(response.dept) + 1;
+
             connection.query(
                 sql, {
                     first_name: response.firstName,
                     last_name: response.lastName,
-                    role_id: response.role8,
+                    manager_id: idmanager,
+                    role_id: idrole,
                 },
                 (err, res) => {
                     if (err) throw err;
                     console.log("we added the new employee");
+                    main();
                 }
             );
         })
